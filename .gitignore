@@ -1,0 +1,7 @@
+# OS Caches
+**/.DS_Store
+
+# JetBrains Caches
+**/*.iml
+**/.idea/
+**/out/
