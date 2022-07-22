@@ -1,6 +1,9 @@
 import pos.Pos;
+import product.Product;
 import storage.Storage;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -10,7 +13,11 @@ public class Main {
         Pos pos = new Pos();
         Storage storage = new Storage();
 
-        while (true) {
+        pos.addMoney(10000);
+
+        boolean exitState = false;
+
+        while (!exitState) {
             System.out.println("1. 상품 추가");
             System.out.println("2. 상품 판매");
             System.out.println("3. 시재 조회");
@@ -19,7 +26,11 @@ public class Main {
 
             int input = scanner.nextInt();
 
-            /* TODO: 사용자가 선택한 메뉴에 대한 동작 구현
+            String name;
+            int price;
+            int number;
+
+            /* DONE: 사용자가 선택한 메뉴에 대한 동작 구현
              * - 상품 추가
              *  - 사용자로부터 추가하려는 상품의 이름, 가격, 개수를 입력받기
              *  - 추가하려는 상품의 총 가격만큼 시재를 차감
@@ -39,6 +50,68 @@ public class Main {
              * - 종료
              *  - 프로그램 종료
              */
+
+            switch (input) {
+                case 1:
+                    try {
+                        System.out.print("Name = ");
+                        name = scanner.next();
+
+                        System.out.print("Price = ");
+                        price = scanner.nextInt();
+
+                        System.out.print("Number = ");
+                        number = scanner.nextInt();
+
+                        pos.subtractMoney(price * number);
+
+                        List<Product> products = new ArrayList<>();
+
+                        for (int index = 0; index < number; index++) {
+                            products.add(new Product(name, price));
+                        }
+
+                        storage.addProducts(products);
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(e.getMessage());
+                    }
+
+                    break;
+
+                case 2:
+                    try {
+                        System.out.print("Name = ");
+                        name = scanner.next();
+
+                        System.out.print("Number = ");
+                        number = scanner.nextInt();
+
+                        List<Product> products = storage.getProduct(name, number);
+
+                        for (Product product : products) {
+                            pos.addMoney(product.getPrice());
+                        }
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(e.getMessage());
+                    }
+
+                    break;
+
+                case 3:
+                    pos.printMoney();
+
+                    break;
+
+                case 4:
+                    storage.printProductsStock();
+
+                    break;
+
+                case 0:
+                    exitState = true;
+
+                    break;
+            }
         }
 
         scanner.close();
