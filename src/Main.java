@@ -53,6 +53,10 @@ public class Main {
 
             switch (input) {
                 case 1:
+                    /* TODO: 할인 정책과 할인 조건을 입력받는 기능 추가
+                     * - 사용자로부터 하나의 할인 정책과 여러 개의 할인 조건을 입력받기
+                     */
+
                     try {
                         System.out.print("Name = ");
                         name = scanner.next();
@@ -79,6 +83,11 @@ public class Main {
                     break;
 
                 case 2:
+                    /* TODO: 결제 정보 생성 기능 추가
+                     * - 현재 날짜와 시각을 갖는 결제 정보 생성
+                     * - 결제 정보에 따라 할인된 금액을 적용
+                     */
+
                     try {
                         System.out.print("Name = ");
                         name = scanner.next();
