@@ -1,7 +1,16 @@
+import payment.PaymentInformation;
 import pos.Pos;
 import product.Product;
+import product.discount.condition.DiscountCondition;
+import product.discount.condition.PeriodDiscountCondition;
+import product.discount.policy.DiscountPolicy;
+import product.discount.policy.FixDiscountPolicy;
+import product.discount.policy.NoneDiscountPolicy;
+import product.discount.policy.RateDiscountPolicy;
 import storage.Storage;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -53,26 +62,28 @@ public class Main {
 
             switch (input) {
                 case 1:
-                    /* TODO: 할인 정책과 할인 조건을 입력받는 기능 추가
+                    /* DONE: 할인 정책과 할인 조건을 입력받는 기능 추가
                      * - 사용자로부터 하나의 할인 정책과 여러 개의 할인 조건을 입력받기
                      */
 
                     try {
-                        System.out.print("Name = ");
+                        System.out.print("상품명 = ");
                         name = scanner.next();
 
-                        System.out.print("Price = ");
+                        System.out.print("가격 = ");
                         price = scanner.nextInt();
 
-                        System.out.print("Number = ");
+                        System.out.print("개수 = ");
                         number = scanner.nextInt();
+
+                        DiscountPolicy discountPolicy = createDiscountPolicy();
 
                         pos.subtractMoney(price * number);
 
                         List<Product> products = new ArrayList<>();
 
                         for (int index = 0; index < number; index++) {
-                            products.add(new Product(name, price));
+                            products.add(new Product(name, price, discountPolicy));
                         }
 
                         storage.addProducts(products);
@@ -83,22 +94,23 @@ public class Main {
                     break;
 
                 case 2:
-                    /* TODO: 결제 정보 생성 기능 추가
+                    /* DONE: 결제 정보 생성 기능 추가
                      * - 현재 날짜와 시각을 갖는 결제 정보 생성
                      * - 결제 정보에 따라 할인된 금액을 적용
                      */
 
                     try {
-                        System.out.print("Name = ");
+                        System.out.print("상품명 = ");
                         name = scanner.next();
 
-                        System.out.print("Number = ");
+                        System.out.print("개수 = ");
                         number = scanner.nextInt();
 
                         List<Product> products = storage.getProduct(name, number);
+                        PaymentInformation paymentInformation = new PaymentInformation(LocalDateTime.now());
 
                         for (Product product : products) {
-                            pos.addMoney(product.getPrice());
+                            pos.addMoney(product.getPrice(paymentInformation));
                         }
                     } catch (IllegalArgumentException e) {
                         System.out.println(e.getMessage());
@@ -124,5 +136,89 @@ public class Main {
         }
 
         scanner.close();
+    }
+
+    private static DiscountPolicy createDiscountPolicy() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("1. 고정 할인 정책 생성");
+        System.out.println("2. 비율 할인 정책 생성");
+        System.out.println("0. 할인 정책 미적용");
+
+        int input = scanner.nextInt();
+
+        List<DiscountCondition> discountConditions = new ArrayList<>();
+
+        int amount;
+        double rate;
+
+        switch (input) {
+            case 1:
+                System.out.print("할인 금액 = ");
+                amount = scanner.nextInt();
+
+                while (true) {
+                    DiscountCondition discountCondition = createDiscountCondition();
+
+                    if (discountCondition == null) {
+                        break;
+                    }
+
+                    discountConditions.add(discountCondition);
+                }
+
+                return new FixDiscountPolicy(discountConditions, amount);
+
+            case 2:
+                System.out.print("할인 비율 = ");
+                rate = scanner.nextDouble();
+
+                while (true) {
+                    DiscountCondition discountCondition = createDiscountCondition();
+
+                    if (discountCondition == null) {
+                        break;
+                    }
+
+                    discountConditions.add(discountCondition);
+                }
+
+                return new RateDiscountPolicy(discountConditions, rate);
+        }
+
+        return new NoneDiscountPolicy();
+    }
+
+    private static DiscountCondition createDiscountCondition() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("1. 기간 할인 조건 생성");
+        System.out.println("0. 종료");
+
+        int input = scanner.nextInt();
+
+        String startDateString;
+        String endDateString;
+
+        LocalDateTime startDate;
+        LocalDateTime endDate;
+
+        switch (input) {
+            case 1:
+                scanner.nextLine();
+
+                System.out.print("시작일 (YYYY-MM-DD HH:MM:SS) = ");
+                startDateString = scanner.nextLine();
+
+                System.out.print("종료일 (YYYY-MM-DD HH:MM:SS) = ");
+                endDateString = scanner.nextLine();
+
+                startDate = LocalDateTime.parse(startDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+                endDate = LocalDateTime.parse(endDateString, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+                return new PeriodDiscountCondition(startDate, endDate);
+        }
+
+        return null;
     }
 }

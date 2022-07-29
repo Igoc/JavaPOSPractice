@@ -1,5 +1,6 @@
 package product;
 
+import payment.PaymentInformation;
 import product.discount.policy.DiscountPolicy;
 
 public class Product {
@@ -21,12 +22,12 @@ public class Product {
         this.name = name;
     }
 
-    public int getPrice() {
-        /* TODO: 할인 정책을 반영하도록 메서드 변경
+    public int getPrice(PaymentInformation paymentInformation) {
+        /* DONE: 할인 정책을 반영하도록 메서드 변경
          * - 적용 가능한 할인 정책이 있을 경우, 할인된 금액을 반환하도록 변경
          */
 
-        return price;
+        return price - discountPolicy.calculateDiscountAmount(paymentInformation, price);
     }
 
     public void setPrice(int price) {

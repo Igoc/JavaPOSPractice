@@ -22,7 +22,6 @@ public class Storage {
                 storage.put(product.getName(), new ArrayList<>());
             }
 
-            product.setPrice((int) (product.getPrice() * 1.1));
             storage.get(product.getName()).add(product);
         }
     }
